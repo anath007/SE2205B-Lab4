@@ -33,13 +33,14 @@ public class HashedDictionaryOpenAddressingLinearInstrumented<K,V> implements Di
     
     public static void resetTotalProbes()
     {
-       // add your code here
+               totalProbes = 0;
+
     }  
 
     public static int getTotalProbes()
     {
         // Change the return statement
-        return 0;
+        return totalProbes;
     }  
     
     public HashedDictionaryOpenAddressingLinearInstrumented()
@@ -149,6 +150,7 @@ public class HashedDictionaryOpenAddressingLinearInstrumented<K,V> implements Di
         return val;
     } // end getHashIndex
     
+   
     
     @Override
     public V getValue(K key)
@@ -195,19 +197,21 @@ public class HashedDictionaryOpenAddressingLinearInstrumented<K,V> implements Di
         
         while ( !found && (hashTable[index] != null) )
         {
+            
             if ( hashTable[index].isIn() &&
                 key.equals(hashTable[index].getKey()) )
                     found = true; // key found
             else // follow probe sequence
                 index = (index + 1) % hashTable.length; // Linear probing
+            totalProbes++;
         } // end while
-        
+        totalProbes++;
         // Assertion: Either key or  null is found at hashTable[index]
         int result = -1;
         
         if (found)
             result = index;
-            
+        
         return result;
     } // end locate
     
@@ -263,6 +267,7 @@ public class HashedDictionaryOpenAddressingLinearInstrumented<K,V> implements Di
                 {
                     index = (index + 1) % hashTable.length; // Linear probing
                 }
+                
             } else // Skip entries that were removed
             {
                 // Save index of first location in removed state
@@ -271,9 +276,10 @@ public class HashedDictionaryOpenAddressingLinearInstrumented<K,V> implements Di
                 }
                 index = (index + 1) % hashTable.length; // Linear probing
             } // end if
+            totalProbes++;
         } // end while
         
-        
+       totalProbes++;
         // Assertion: Either key or null is found at hashTable[index]
         if (found || (removedStateIndex == -1) )
             return index; // Index of either key or null
@@ -403,7 +409,7 @@ public class HashedDictionaryOpenAddressingLinearInstrumented<K,V> implements Di
     } // end TableEntry
     
     
-    
+   
     
     private class KeyIterator implements Iterator<K>
     {

@@ -1,6 +1,9 @@
 package hashtable;
+import static java.lang.Math.abs;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.Random;
+import java.lang.String;
     
 /**
  * A class that implements the ADT dictionary by using hashing and
@@ -34,15 +37,15 @@ public class HashedDictionaryOpenAddressingDoubleInstrumented<K,V> implements Di
     
     public static void resetTotalProbes()
     {
-       // add your code here
+               totalProbes = 0;
+
     }  
 
     public static int getTotalProbes()
     {
         // Change the return statement
-        return 0;
+        return totalProbes;
     }  
-    
     
     
     public HashedDictionaryOpenAddressingDoubleInstrumented()
@@ -152,6 +155,16 @@ public class HashedDictionaryOpenAddressingDoubleInstrumented<K,V> implements Di
         return val;
     } // end getHashIndex
     
+// ADD IN CODE FOR THE SECOND HASH FUNCION
+//>>>>>>>>>>>>> ADDED CODE >>>>>>>>>>>>>>
+ private int getSecondHashIndex(K key){
+ 
+     int val=key.toString().hashCode();
+     val=Math.abs(val);
+     int second=(val%(hashTable.length-1))+1;
+     return second;
+ }
+//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
     
     @Override
     public V getValue(K key)
@@ -186,7 +199,7 @@ public class HashedDictionaryOpenAddressingDoubleInstrumented<K,V> implements Di
             hashTable[index].setToRemoved();
             numberOfEntries--;
         } // end if
-        
+         
         // else key not found; return null
         return removedValue;
     } // end remove
@@ -195,22 +208,40 @@ public class HashedDictionaryOpenAddressingDoubleInstrumented<K,V> implements Di
     private int locate(int index, K key)
     {
         boolean found = false;
-        
+//        int temp = index;
+//        int number = abs((Integer)key);
+//        int first = number % hashTable.length ;
+        int second = getSecondHashIndex(key);
         while ( !found && (hashTable[index] != null) )
         {
+           
             if ( hashTable[index].isIn() &&
                 key.equals(hashTable[index].getKey()) )
-                    found = true; // key found
-            else // follow probe sequence
-                index = (index + 1) % hashTable.length; // Linear probing
+                found = true; // key found
+           else // follow probe sequence
+//                if(temp == index)
+//                    index = first;
+//                else
+//                    index = (index + second) % hashTable.length;
+//                if(index <= 0){
+//                    while(index <= 0)
+//                        index++;}
+//                else if (index >= hashTable.length){
+//                    while(index >= hashTable.length)
+//                        index--;}
+                    index=(index+second)% hashTable.length; 
+                    totalProbes++;
+          
+       
         } // end while
+        totalProbes++;
         
         // Assertion: Either key or  null is found at hashTable[index]
         int result = -1;
         
         if (found)
             result = index;
-            
+      
         return result;
     } // end locate
     
@@ -255,30 +286,58 @@ public class HashedDictionaryOpenAddressingDoubleInstrumented<K,V> implements Di
     // Precondition: checkInitialization has been called.
     private int probe(int index, K key) {
         boolean found = false;
+//        int temp = index;
+//        int number = 0;
+//        int second = 0;
+//        String test = "";
+//        if(key.getClass() == String.class)
+//            test = (String)key;
+//        else{
+//            number = abs((Integer)key);
+//            second = getSecondHashIndex(key);}
+//        int first = number % hashTable.length;
+//       
+            int second = getSecondHashIndex(key);
         int removedStateIndex = -1; // Index of first location in
         // removed state
-
+        
         while (!found && (hashTable[index] != null)) {
-            if (hashTable[index].isIn()) {
-                if (key.equals(hashTable[index].getKey())) {
+            if (hashTable[index].isIn())
+                    if(key.equals(hashTable[index].getKey())) {
+                
                     found = true; // Key found
-                } else // Follow probe sequence
+                } 
+                    else // Follow probe sequence
+                    
                 {
-                    index = (index + 1) % hashTable.length; // Linear probing
+//                    if(temp == index)
+//                        index = first;
+//                    else
+                        index = (index + second) % hashTable.length;
+//                    if(index <= 0){
+//                        while(index <= 0)
+//                            index++;}
+//                else if (index >= hashTable.length){
+//                    while(index >= hashTable.length)
+//                        index--;}
                 }
-            } else // Skip entries that were removed
+                
+              
+           else
             {
-                // Save index of first location in removed state
+               // Save index of first location in removed state
                 if (removedStateIndex == -1) {
                     removedStateIndex = index;
                 }
-                index = (index + 1) % hashTable.length; // Linear probing
+
+                index=(index+second)%hashTable.length;
             } // end if
+            totalProbes++;
         } // end while
         
-        
+        totalProbes++;
         // Assertion: Either key or null is found at hashTable[index]
-        if (found || (removedStateIndex == -1) )
+        if (found || removedStateIndex == -1)            
             return index; // Index of either key or null
         else
             return removedStateIndex; // Index of an available location
